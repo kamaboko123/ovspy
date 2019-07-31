@@ -1,0 +1,2 @@
+class OvsTransactionError(Exception):
+    pass

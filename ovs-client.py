@@ -27,7 +27,15 @@ class OvsdbClient:
         s.connect((str(self._ovsdb_ip), self._ovsdb_port))
         
         s.send(json.dumps(query))
-        response = s.recv(8192)
+        
+        response = bytearray()
+        while True:
+            buf = byte_array(s.recv(64))
+            if len(buf) == 0:
+                break
+            response.append(buf)
+        
+        response = bytes(response)
         
         return json.loads(response)
     
