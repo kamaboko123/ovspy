@@ -33,3 +33,6 @@ class OvsPort():
         
         raise Exception("")
     
+    def get_raw(self):
+        return self.ovs_client.get_port_raw(port_id=self.get_uuid())
+    

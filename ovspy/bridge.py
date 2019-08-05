@@ -32,16 +32,16 @@ class OvsBridge():
                 return p
         return None
     
+    def get_raw(self):
+        return self.ovs_client.get_bridge_raw(bridge_id=self.id)
+    
     def get_name(self):
         target_bridge = self.ovs_client.get_bridge_raw(bridge_id=self.id)
         return target_bridge['name']
     
-    def add_ports(self, port_name, vlan=None):
-        if self.ovs_client.find_bridge(self.get_name()) is None:
-            raise Exception("bridge is not found")
-        
-        if self.find_port(port_name) is not None:
-            raise Exception("port is already exist")
+    def add_port(self, port_name, vlan=None):
+        self.ovs_client.add_port_to_bridge(self, port_name, vlan)
     
-    def del_ports(self, port_name, vlan=None):
+    def del_port(self, port_name, vlan=None):
         pass
+    
