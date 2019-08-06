@@ -7,7 +7,7 @@ from .port import OvsPort
 import re
 
 class OvsClient:
-    SEND_DEBUG = True
+    SEND_DEBUG = False
     RECV_DEBUG = False
     def __init__(self, ovsdb_port, ovsdb_ip="127.0.0.1"):
         self._ovsdb_ip = ipaddress.ip_address(ovsdb_ip)
@@ -20,29 +20,32 @@ class OvsClient:
         if self.SEND_DEBUG:
             print("[SEND] %s" % json.dumps(query).encode())
         s.send(json.dumps(query).encode())
-        s.shutdown(socket.SHUT_RDWR)
+        #s.shutdown(socket.SHUT_RDWR)
         
-        response = bytes()
+        buf = bytes()
         bufsize = 16
+        
         while True:
-            buf = s.recv(bufsize)
+            buf += s.recv(bufsize)
             
-            #skip echo method(based JSON-RPC)
-            #https://tools.ietf.org/html/rfc7047
-            if re.search(r'"method":"echo"', buf.decode()) is not None:
-                continue
-            
-            if len(buf) == 0:
+            try:
+                query_result = json.loads(buf.decode())
+                
+                #TODO: implement echo method
+                #[temporary]skip echo method(based JSON-RPC)
+                #https://tools.ietf.org/html/rfc7047
+                if "method" in query_result.keys() and query_result["method"] == "echo":
+                    buf = bytes()
+                    continue
+                
                 break
-            
-            response += buf
+            except json.JSONDecodeError:
+                pass
             
         s.close()
         
-        query_result = json.loads(response.decode())
-        
         if self.RECV_DEBUG:
-            print("[RECV] %s" % response.decode())
+            print("[RECV] %s" % query_result)
         
         self._check_error(query_result)
         
@@ -61,6 +64,9 @@ class OvsClient:
         query = ovsdb_query.Generator.get_bridges()
         
         result = self._send(query)
+        
+        #if result is None:
+        #    return []
         
         if bridge_id is None:
             return result["result"][0]["rows"]

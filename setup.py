@@ -4,7 +4,7 @@ requires = []
 
 setup(
     name='ovspy',
-    version='0.0',
+    version='0.1a0.dev1',
     description='Open vSwitch Mnipulation Library',
     url='https://github.com/kamaboko123/ovspy',
     author='kamaboko123',
@@ -13,7 +13,7 @@ setup(
     packages=['ovspy'],
     install_requires=requires,
     classifiers=[
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
     ]
 )
 
