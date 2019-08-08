@@ -11,7 +11,7 @@ pip install ovspy
 
 ### Configure Open vSwitch Manager
 This library manipulate Open vSwitch by access OVSDB  
-We need to configure OVSDB manager port.
+You need to configure OVSDB manager port to manipulate OVSDB by TCP.
 ```
 sudo ovs-vsctl set-manager ptcp:5678
 ```

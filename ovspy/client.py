@@ -4,7 +4,8 @@ import json
 from . import ovsdb_query
 from .bridge import OvsBridge
 from .port import OvsPort
-import re
+from datetime import datetime, timedelta
+import sys
 
 class OvsClient:
     SEND_DEBUG = False
@@ -12,61 +13,68 @@ class OvsClient:
     def __init__(self, ovsdb_port, ovsdb_ip="127.0.0.1"):
         self._ovsdb_ip = ipaddress.ip_address(ovsdb_ip)
         self._ovsdb_port = int(ovsdb_port)
+        self._query_timeout = 5
     
     def _send(self, query):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((str(self._ovsdb_ip), self._ovsdb_port))
         
         if self.SEND_DEBUG:
-            print("[SEND] %s" % json.dumps(query).encode())
+            sys.stderr.write("[SEND] %s\n" % json.dumps(query).encode())
         s.send(json.dumps(query).encode())
         #s.shutdown(socket.SHUT_RDWR)
         
         buf = bytes()
         bufsize = 16
         
+        timeout = datetime.now() + timedelta(seconds=self._query_timeout)
         while True:
+            if datetime.now() >= timeout:
+                raise Exception("Timeout")
+            
             buf += s.recv(bufsize)
             
             try:
                 query_result = json.loads(buf.decode())
                 
-                #TODO: implement echo method
-                #[temporary]skip echo method(based JSON-RPC)
+                #echo method
                 #https://tools.ietf.org/html/rfc7047
                 if "method" in query_result.keys() and query_result["method"] == "echo":
+                    echo_reply= {
+                        "method": "echo",
+                        "params": query_result["params"],
+                        "id": query_result["id"]
+                    }
+                    s.send(json.loads(echo_reply).encode())
                     buf = bytes()
                     continue
-                
-                break
+                else:
+                    break
             except json.JSONDecodeError:
                 pass
-            
+        
         s.close()
         
         if self.RECV_DEBUG:
-            print("[RECV] %s" % query_result)
+            sys.stderr.write("[RECV] %s\n" % query_result)
         
         self._check_error(query_result)
-        
-        if "error" not in query_result.keys() or query_result["error"] is not None:
-            raise Exception("Query error. %s" % query_result)
         
         return query_result
     
     @staticmethod
     def _check_error(query_result_json):
-        for item in query_result_json["result"]:
-            if "error" in item.keys():
-                raise Exception("[QueryError] %s" % item["details"])
+        if "result" in query_result_json.keys():
+            for item in query_result_json["result"]:
+                if "error" in item.keys():
+                    raise Exception("[QueryError] %s" % item["details"])
+        elif len(query_result_json["error"]) != 0:
+            raise Exception("[QueryError] %s" % query_result_json["error"])
     
     def get_bridge_raw(self, bridge_id=None):
         query = ovsdb_query.Generator.get_bridges()
         
         result = self._send(query)
-        
-        #if result is None:
-        #    return []
         
         if bridge_id is None:
             return result["result"][0]["rows"]
