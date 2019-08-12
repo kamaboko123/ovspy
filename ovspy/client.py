@@ -85,7 +85,7 @@ class OvsClient:
         
         return None
     
-    def get_bridges(self):
+    def get_bridge(self):
         bridges = self.get_bridge_raw()
         ret = []
         
@@ -97,7 +97,7 @@ class OvsClient:
         return ret
     
     def find_bridge(self, bridge_name):
-        for br in self.get_bridges():
+        for br in self.get_bridge():
             if br.get_name() == bridge_name:
                 return br
         return None

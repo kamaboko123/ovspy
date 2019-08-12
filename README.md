@@ -20,9 +20,9 @@ sudo ovs-vsctl set-manager ptcp:5678
 ```
 >>> import ovspy.client
 >>> ovs = ovspy.client.OvsClient(5678)
->>> ovs.get_bridges()
+>>> ovs.get_bridge()
 [<ovspy.bridge.OvsBridge object at 0x7f3197bc1fd0>]
->>> ovs.get_bridges()[0].get_name()
+>>> ovs.get_bridge()[0].get_name()
 'br0'
 ```
 
