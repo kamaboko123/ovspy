@@ -5,7 +5,7 @@ from ovspy.client import OvsClient
 
 class TestOvspy(unittest.TestCase):
     def setUp(self):
-        cmd_del_all_bridge = "sudo ovs-vsctl show | grep Bridge | awk '{print $2}' | xargs -n 1 sudo ovs-vsctl del-br"
+        cmd_del_all_bridge = "ovs-vsctl show | grep Bridge | awk '{print $2}' | xargs -n 1 ovs-vsctl del-br"
         subprocess.run(cmd_del_all_bridge, shell=True)
         self.ovs = OvsClient(5678)
     
