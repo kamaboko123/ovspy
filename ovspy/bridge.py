@@ -23,10 +23,14 @@ class OvsBridge():
                 _port = OvsPort(port[1])
                 _port.set_client(self.ovs_client)
                 ret.append(_port)
+        elif target_bridge["ports"][0] == "uuid":
+            _port = OvsPort(target_bridge["ports"][1])
+            _port.set_client(self.ovs_client)
+            ret.append(_port)
         
         return ret
     
-    def find_port(self, port_name):
+    def find_ports(self, port_name):
         for p in self.get_ports():
             if p.get_name() == port_name:
                 return p

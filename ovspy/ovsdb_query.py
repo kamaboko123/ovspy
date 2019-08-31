@@ -1,6 +1,10 @@
 import uuid
+import random
 
 class Generator():
+    
+    id_min = 0
+    id_max = 10000
     
     @staticmethod
     def get_bridges():
@@ -14,7 +18,7 @@ class Generator():
                     "where" : [],
                 }
             ],
-            "id":0
+            "id": random.randint(Generator.id_min, Generator.id_max)
         }
         
         return query
@@ -31,7 +35,7 @@ class Generator():
                     "where" : [],
                 }
             ],
-            "id":0
+            "id": random.randint(Generator.id_min, Generator.id_max)
         }
         
         return query
@@ -47,7 +51,6 @@ class Generator():
         ports = []
         ports.extend(exist_port_list)
         ports.append(["named-uuid", port_tmp_id])
-        
         query = {
             "method":"transact",
             "params":[
@@ -58,7 +61,7 @@ class Generator():
                     "table" : "Interface",
                     "row":{
                         "name":new_port_name,
-                        "type":""
+                        #"type":""
                     }
                 },
                 {
@@ -94,7 +97,7 @@ class Generator():
                     "table": "Bridge"
                 }
             ],
-            "id":0
+            "id": random.randint(Generator.id_min, Generator.id_max)
         }
         
         if vlan is not None:

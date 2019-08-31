@@ -6,10 +6,12 @@ from .bridge import OvsBridge
 from .port import OvsPort
 from datetime import datetime, timedelta
 import sys
+import time
 
 class OvsClient:
     SEND_DEBUG = False
     RECV_DEBUG = False
+    
     def __init__(self, ovsdb_port, ovsdb_ip="127.0.0.1"):
         self._ovsdb_ip = ipaddress.ip_address(ovsdb_ip)
         self._ovsdb_port = int(ovsdb_port)
@@ -59,7 +61,6 @@ class OvsClient:
             sys.stderr.write("[RECV] %s\n" % query_result)
         
         self._check_error(query_result)
-        
         return query_result
     
     @staticmethod
@@ -85,7 +86,7 @@ class OvsClient:
         
         return None
     
-    def get_bridge(self):
+    def get_bridges(self):
         bridges = self.get_bridge_raw()
         ret = []
         
@@ -97,7 +98,7 @@ class OvsClient:
         return ret
     
     def find_bridge(self, bridge_name):
-        for br in self.get_bridge():
+        for br in self.get_bridges():
             if br.get_name() == bridge_name:
                 return br
         return None
@@ -124,16 +125,21 @@ class OvsClient:
         return None
     
     def add_port_to_bridge(self, bridge, port_name, vlan=None):
-        target_bridge = bridge.get_raw()
-        if target_bridge is None:
+        bridge_raw = bridge.get_raw()
+        if bridge_raw is None:
             raise Exception("bridge is not found")
         
         if self.find_port(port_name) is not None:
             raise Exception("port is already exist")
         
-        query = ovsdb_query.Generator.add_port(bridge.get_uuid(), target_bridge["ports"][1], port_name, vlan=vlan)
+        #print(bridge.get_raw())
         
-        print(self._send(query))
+        exist_ports = []
+        for p in bridge.get_ports():
+            exist_ports.append(["uuid", p.get_uuid()])
+        
+        query = ovsdb_query.Generator.add_port(bridge.get_uuid(), exist_ports, port_name, vlan=vlan)
+        self._send(query)
     
     def del_port_from_bridge(self):
         pass
