@@ -30,7 +30,7 @@ class OvsBridge():
         
         return ret
     
-    def find_ports(self, port_name):
+    def find_port(self, port_name):
         for p in self.get_ports():
             if p.get_name() == port_name:
                 return p

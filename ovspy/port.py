@@ -10,8 +10,8 @@ class OvsPort():
     def get_uuid(self):
         return self.id
     
-    def get_info(self):
-        return copy.deepcopy(self.ovs_client.get_port_raw(port_id=self.id))
+    #def get_info(self):
+    #    return copy.deepcopy(self.ovs_client.get_port_raw(port_id=self.id))
     
     def get_name(self):
         target_port = self.ovs_client.get_port_raw(port_id=self.id)

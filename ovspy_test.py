@@ -31,17 +31,38 @@ class TestOvspy(unittest.TestCase):
         self.assertEqual(bridge.get_name(), bridge_name)
         self.assertEqual(len(bridge.get_ports()), 1)
         
-        #add_port
-        
-        #trunk
         bridge.add_port("p1")
         self.assertEqual(len(bridge.get_ports()), 2)
         
-        bridge.add_port("p2")
+        bridge.add_port("p2", [])
         self.assertEqual(len(bridge.get_ports()), 3)
         
-        for p in bridge.get_ports():
-            print(p.get_name())
+        bridge.add_port("p3", 3)
+        self.assertEqual(len(bridge.get_ports()), 4)
+        
+        bridge.add_port("p4", 4)
+        self.assertEqual(len(bridge.get_ports()), 5)
+        
+        bridge.add_port("p5", [5, 15])
+        self.assertEqual(len(bridge.get_ports()), 6)
+        
+        bridge.add_port("p6", [6, 16])
+        self.assertEqual(len(bridge.get_ports()), 7)
+        
+        self.assertEqual(bridge.find_port("p0"), None)
+        self.assertEqual(bridge.find_port("p1").get_name(), "p1")
+        self.assertEqual(bridge.find_port("p2").get_name(), "p2")
+        self.assertEqual(bridge.find_port("p3").get_name(), "p3")
+        self.assertEqual(bridge.find_port("p4").get_name(), "p4")
+        self.assertEqual(bridge.find_port("p5").get_name(), "p5")
+        self.assertEqual(bridge.find_port("p6").get_name(), "p6")
+        
+        self.assertEqual(bridge.find_port("p1").get_vlan_info(), {"mode":"trunk","tag":[]})
+        self.assertEqual(bridge.find_port("p2").get_vlan_info(), {"mode":"trunk","tag":[]})
+        self.assertEqual(bridge.find_port("p3").get_vlan_info(), {"mode":"access","tag":3})
+        self.assertEqual(bridge.find_port("p4").get_vlan_info(), {"mode":"access","tag":4})
+        self.assertEqual(bridge.find_port("p5").get_vlan_info(), {"mode":"trunk","tag":[5,15]})
+        self.assertEqual(bridge.find_port("p6").get_vlan_info(), {"mode":"trunk","tag":[6,16]})
     
     def init_ovs(self):
         cmd_del_all_bridge = "ovs-vsctl show | grep Bridge | awk '{print $2}' | xargs -n 1 ovs-vsctl del-br"
