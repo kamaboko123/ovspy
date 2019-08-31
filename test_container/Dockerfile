@@ -17,6 +17,7 @@ RUN yum -y update
 RUN yum -y upgrade
 RUN yum -y install bridge-utils openvswitch git python3
 RUN yum -y install python36
+RUN yum -y install python36-pip
 RUN git clone https://github.com/kamaboko123/ovspy.git /root/ovspy
 COPY run_test.sh /root
 
