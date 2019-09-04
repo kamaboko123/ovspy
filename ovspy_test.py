@@ -38,7 +38,7 @@ class TestOvspy(unittest.TestCase):
         
         self.assertEqual(self.ovs.get_bridges()[0].get_name(), "br2")
     
-    def tes_ports(self):
+    def test_ports(self):
         self.init_ovs()
         
         bridge_name = "br0"
