@@ -31,7 +31,7 @@ class OvsPort():
                 "tag":target_port["tag"]
             }
         
-        raise Exception("")
+        raise ovspy_error.Unsupported("The VLAN configuration parameters is unsupported ovspy. (%s)", target_port)
     
     def get_raw(self):
         return self.ovs_client.get_port_raw(port_id=self.get_uuid())

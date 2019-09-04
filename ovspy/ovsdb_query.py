@@ -119,7 +119,7 @@ class Generator():
             new_ports.append(["uuid", p])
         
         ret = {
-            "id": 2,
+            "id": random.randint(Generator.id_min, Generator.id_max),
             "method": "transact",
             "params": [
                 "Open_vSwitch",

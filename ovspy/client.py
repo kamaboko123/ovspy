@@ -5,6 +5,7 @@ from . import ovsdb_query
 from .bridge import OvsBridge
 from .port import OvsPort
 from datetime import datetime, timedelta
+from . import ovspy_error
 import sys
 import time
 
@@ -32,7 +33,7 @@ class OvsClient:
         timeout = datetime.now() + timedelta(seconds=self._query_timeout)
         while True:
             if datetime.now() >= timeout:
-                raise Exception("Timeout")
+                raise ovspy_error.TransactionError("Timeout")
             
             buf += s.recv(bufsize)
             
@@ -68,9 +69,9 @@ class OvsClient:
         if "result" in query_result_json.keys():
             for item in query_result_json["result"]:
                 if "error" in item.keys():
-                    raise Exception("[QueryError] %s" % item["details"])
+                    raise ovspy_error.TransactionError("[QueryError] %s" % item["details"])
         elif len(query_result_json["error"]) != 0:
-            raise Exception("[QueryError] %s" % query_result_json["error"])
+            raise ovspy_error.TransactionError("[QueryError] %s" % query_result_json["error"])
     
     def get_bridge_raw(self, bridge_id=None):
         query = ovsdb_query.Generator.get_bridges()
@@ -127,10 +128,10 @@ class OvsClient:
     def add_port_to_bridge(self, bridge, port_name, vlan=None):
         bridge_raw = bridge.get_raw()
         if bridge_raw is None:
-            raise Exception("bridge is not found")
+            raise ovspy_error.NotFound("bridge is not found")
         
         if self.find_port(port_name) is not None:
-            raise Exception("port is already exist")
+            raise ovspy_error.Duplicate("port is already exist")
         
         #print(bridge.get_raw())
         
@@ -150,9 +151,9 @@ class OvsClient:
         exist_ports = list(set(exist_ports))
         
         if target_port is None:
-            raise Exception("Specified port(%s) is not exist in bridge(%s)." % (port_name, bridge.get_name()))
+            raise ovspy_error.NotFound("Specified port(%s) is not exist in bridge(%s)." % (port_name, bridge.get_name()))
         if target_port.get_uuid() not in exist_ports:
-            raise Exception("Specified port(%s) is not exist in bridge(%s)." % (port_name, bridge.get_name()))
+            raise ovspy_error.NotFound("Specified port(%s) is not exist in bridge(%s)." % (port_name, bridge.get_name()))
         
         query = ovsdb_query.Generator.del_port(bridge.get_uuid(), exist_ports, target_port.get_uuid())
         self._send(query)
