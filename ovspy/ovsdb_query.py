@@ -41,7 +41,7 @@ class Generator():
         return query
     
     @staticmethod
-    def add_port(bridge_id, exist_port_list, new_port_name, vlan=None):
+    def add_port(bridge_id, exist_port_id_list, new_port_name, vlan=None):
         
         #generate temporary values for query string needs
         interface_tmp_id = "row%s" % str(uuid.uuid4()).replace("-", "_")
@@ -49,8 +49,10 @@ class Generator():
         
         #generate new port list
         ports = []
-        ports.extend(exist_port_list)
+        for p_id in exist_port_id_list:
+            ports.append(["uuid", p_id])
         ports.append(["named-uuid", port_tmp_id])
+        
         query = {
             "method":"transact",
             "params":[
@@ -108,4 +110,42 @@ class Generator():
             else:
                 raise ValueError("Invalid VLAN type or format was specified.")
         return query
+    
+    @staticmethod
+    def del_port(bridge_id, bridge_port_id_list, target_port_id):
+        bridge_port_id_list.remove(target_port_id)
+        new_ports = []
+        for p in bridge_port_id_list:
+            new_ports.append(["uuid", p])
+        
+        ret = {
+            "id": 2,
+            "method": "transact",
+            "params": [
+                "Open_vSwitch",
+                {
+                    "where": [
+                        [
+                            "_uuid",
+                            "==",
+                            [
+                                "uuid",
+                                bridge_id
+                            ]
+                        ]
+                    ],
+                    "row": {
+                        "ports": [
+                            "set",
+                            new_ports
+                        ]
+                    },
+                    "op": "update",
+                    "table": "Bridge"
+                }
+            ]
+        }
+        
+        return ret
+    
 

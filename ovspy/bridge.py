@@ -47,5 +47,5 @@ class OvsBridge():
         self.ovs_client.add_port_to_bridge(self, port_name, vlan)
     
     def del_port(self, port_name, vlan=None):
-        pass
+        self.ovs_client.del_port_from_bridge(self, port_name)
     

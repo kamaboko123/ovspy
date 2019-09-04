@@ -136,10 +136,24 @@ class OvsClient:
         
         exist_ports = []
         for p in bridge.get_ports():
-            exist_ports.append(["uuid", p.get_uuid()])
+            exist_ports.append(p.get_uuid())
         
         query = ovsdb_query.Generator.add_port(bridge.get_uuid(), exist_ports, port_name, vlan=vlan)
         self._send(query)
     
-    def del_port_from_bridge(self):
-        pass
+    def del_port_from_bridge(self, bridge, port_name):
+        target_port = bridge.find_port(port_name)
+        
+        exist_ports = []
+        for p in bridge.get_ports():
+            exist_ports.append(p.get_uuid())
+        exist_ports = list(set(exist_ports))
+        
+        if target_port is None:
+            raise Exception("Specified port(%s) is not exist in bridge(%s)." % (port_name, bridge.get_name()))
+        if target_port.get_uuid() not in exist_ports:
+            raise Exception("Specified port(%s) is not exist in bridge(%s)." % (port_name, bridge.get_name()))
+        
+        query = ovsdb_query.Generator.del_port(bridge.get_uuid(), exist_ports, target_port.get_uuid())
+        self._send(query)
+        

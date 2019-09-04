@@ -63,6 +63,21 @@ class TestOvspy(unittest.TestCase):
         self.assertEqual(bridge.find_port("p4").get_vlan_info(), {"mode":"access","tag":4})
         self.assertEqual(bridge.find_port("p5").get_vlan_info(), {"mode":"trunk","tag":[5,15]})
         self.assertEqual(bridge.find_port("p6").get_vlan_info(), {"mode":"trunk","tag":[6,16]})
+        
+        bridge.del_port("p1")
+        bridge.del_port("p3")
+        bridge.del_port("p5")
+        self.assertEqual(len(bridge.get_ports()), 4)
+        
+        self.assertEqual(bridge.find_port("p0"), None)
+        self.assertEqual(bridge.find_port("p1"), None)
+        self.assertEqual(bridge.find_port("p2").get_name(), "p2")
+        self.assertEqual(bridge.find_port("p3"), None)
+        self.assertEqual(bridge.find_port("p4").get_name(), "p4")
+        self.assertEqual(bridge.find_port("p5"), None)
+        self.assertEqual(bridge.find_port("p6").get_name(), "p6")
+        
+
     
     def init_ovs(self):
         cmd_del_all_bridge = "ovs-vsctl show | grep Bridge | awk '{print $2}' | xargs -n 1 ovs-vsctl del-br"
