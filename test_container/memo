@@ -1,0 +1,9 @@
+#build
+docker build --no-cache -t ovstest ./
+
+#run
+docker run -it -d --privileged --rm --name ovstest ovstest
+
+#test
+docker exec -it ovstest /root/run_test.sh
+
