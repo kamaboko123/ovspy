@@ -239,4 +239,40 @@ class Generator():
         }
         
         return ret
-
+    
+    @staticmethod
+    def del_bridge(ovs_id, bridge_id_list, target_bridge_id):
+        bridge_id_list.remove(target_bridge_id)
+        new_bridges = []
+        for br in bridge_id_list:
+            new_bridges.append(["uuid", br])
+        
+        ret = {
+            "id": random.randint(Generator.id_min, Generator.id_max),
+            "method": "transact",
+            "params": [
+                "Open_vSwitch",
+                {
+                    "where": [
+                        [
+                            "_uuid",
+                            "==",
+                            [
+                                "uuid",
+                                ovs_id
+                            ]
+                        ]
+                    ],
+                    "row": {
+                        "bridges": [
+                            "set",
+                            new_bridges
+                        ]
+                    },
+                    "op": "update",
+                    "table": "Open_vSwitch"
+                }
+            ]
+        }
+        
+        return ret

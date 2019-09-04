@@ -20,6 +20,23 @@ class TestOvspy(unittest.TestCase):
         self.ovs.add_bridge("br2")
         self.assertEqual(len(self.ovs.get_bridges()), 2)
         
+        self.assertEqual(self.ovs.find_bridge("br0"), None)
+        self.assertEqual(self.ovs.find_bridge("br1").get_name(), "br1")
+        self.assertEqual(self.ovs.find_bridge("br2").get_name(), "br2")
+        
+        with self.assertRaises(ovspy_error.Duplicate):
+            self.ovs.add_bridge("br1")
+        
+        self.ovs.del_bridge("br1")
+        self.assertEqual(self.ovs.find_bridge("br1"), None)
+        
+        self.assertEqual(len(self.ovs.get_bridges()), 1)
+        
+        with self.assertRaises(ovspy_error.NotFound):
+            self.ovs.del_bridge("br1")
+        self.assertEqual(len(self.ovs.get_bridges()), 1)
+        
+        self.assertEqual(self.ovs.get_bridges()[0].get_name(), "br2")
     
     def tes_ports(self):
         self.init_ovs()

@@ -77,7 +77,6 @@ class OvsClient:
     def get_ovs_raw(self):
         query = ovsdb_query.Generator.get_ovs()
         result = self._send(query)
-        print(result)
         return result
     
     #get id of Open_vSwitch entry from Open_vSwitch table
@@ -182,4 +181,18 @@ class OvsClient:
         self._send(query)
         
     def del_bridge(self, bridge_name):
-        pass
+        target_bridge = self.find_bridge(bridge_name)
+        
+        exist_bridges = []
+        for br in self.get_bridges():
+            exist_bridges.append(br.get_uuid())
+        
+        if target_bridge is None:
+            raise ovspy_error.NotFound("Bridge(%s) is not exist." % bridge_name)
+        if target_bridge.get_uuid() not in exist_bridges:
+            raise ovspy_error.NotFound("Bridge(%s) is not exist." % bridge_name)
+        
+        query = ovsdb_query.Generator.del_bridge(self.get_uuid(), exist_bridges, target_bridge.get_uuid())
+        self._send(query)
+    
+
