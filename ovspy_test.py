@@ -6,7 +6,7 @@ from ovspy import ovspy_error
 class TestOvspy(unittest.TestCase):
     def setUp(self):
         self.ovs = OvsClient(5678)
-        self.ovs.SEND_DEBUG = True
+        self.ovs.SEND_DEBUG = False
         self.ovs.RECV_DEBUG = False
         
     def test_bridge(self):
@@ -16,8 +16,12 @@ class TestOvspy(unittest.TestCase):
         bridges = self.ovs.get_bridges()
         self.assertEqual(len(bridges), 0)
         
+        self.ovs.add_bridge("br1")
+        self.ovs.add_bridge("br2")
+        self.assertEqual(len(self.ovs.get_bridges()), 2)
+        
     
-    def test_ports(self):
+    def tes_ports(self):
         self.init_ovs()
         
         bridge_name = "br0"
@@ -90,6 +94,8 @@ class TestOvspy(unittest.TestCase):
         
         with self.assertRaises(ovspy_error.NotFound):
             bridge.del_port("p0")
+        
+        self.assertEqual(len(bridge.get_ports()), 4)
     
     def init_ovs(self):
         cmd_del_all_bridge = "ovs-vsctl show | grep Bridge | awk '{print $2}' | xargs -n 1 ovs-vsctl del-br"

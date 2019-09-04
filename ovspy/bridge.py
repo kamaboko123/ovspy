@@ -19,7 +19,6 @@ class OvsBridge():
         #'set' is not exist, the bridges doesn't have ports
         if target_bridge["ports"][0] == 'set':
             for port in target_bridge["ports"][1]:
-                print(port)
                 _port = OvsPort(port[1])
                 _port.set_client(self.ovs_client)
                 ret.append(_port)

@@ -7,6 +7,23 @@ class Generator():
     id_max = 10000
     
     @staticmethod
+    def get_ovs():
+        query = {
+            "method":"transact",
+            "params":[
+                "Open_vSwitch",
+                {
+                    "op" : "select",
+                    "table" : "Open_vSwitch",
+                    "where" : [],
+                }
+            ],
+            "id": random.randint(Generator.id_min, Generator.id_max)
+        }
+        
+        return query
+    
+    @staticmethod
     def get_bridges():
         query = {
             "method":"transact",
@@ -148,4 +165,78 @@ class Generator():
         
         return ret
     
+    @staticmethod
+    def add_bridge(ovs_id, bridge_name, exist_bridge_id_list):
+        #generate temporary values for query string needs
+        bridge_tmp_id = "row%s" % str(uuid.uuid4()).replace("-", "_")
+        inital_port_tmp_id = "row%s" % str(uuid.uuid4()).replace("-", "_")
+        inital_interface_tmp_id = "row%s" % str(uuid.uuid4()).replace("-", "_")
+        
+        bridges = []
+        for br_id in exist_bridge_id_list:
+            bridges.append(["uuid", br_id])
+        bridges.append(["named-uuid", bridge_tmp_id])
+        
+        ret = {
+            "id": random.randint(Generator.id_min, Generator.id_max),
+            "method": "transact",
+            "params": [
+                "Open_vSwitch",
+                {
+                    "where": [
+                        [
+                            "_uuid",
+                            "==",
+                            [
+                                "uuid",
+                                ovs_id
+                            ]
+                        ]
+                    ],
+                    "row": {
+                        "bridges": [
+                            "set",
+                            bridges
+                        ]
+                    },
+                    "op": "update",
+                    "table": "Open_vSwitch"
+                },
+                {
+                    "uuid-name": inital_port_tmp_id,
+                    "row": {
+                        "name": bridge_name,
+                        "interfaces": [
+                            "named-uuid",
+                            inital_interface_tmp_id
+                        ]
+                    },
+                    "op": "insert",
+                    "table": "Port"
+                },
+                {
+                    "uuid-name": bridge_tmp_id,
+                    "row": {
+                        "name": bridge_name,
+                        "ports": [
+                            "named-uuid",
+                            inital_port_tmp_id
+                        ]
+                    },
+                    "op": "insert",
+                    "table": "Bridge"
+                },
+                {
+                    "uuid-name": inital_interface_tmp_id,
+                    "row": {
+                        "name": bridge_name,
+                        "type": "internal"
+                    },
+                    "op": "insert",
+                    "table": "Interface"
+                },
+            ]
+        }
+        
+        return ret
 

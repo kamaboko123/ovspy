@@ -73,6 +73,17 @@ class OvsClient:
         elif len(query_result_json["error"]) != 0:
             raise ovspy_error.TransactionError("[QueryError] %s" % query_result_json["error"])
     
+    #get Open_vSwitch table
+    def get_ovs_raw(self):
+        query = ovsdb_query.Generator.get_ovs()
+        result = self._send(query)
+        print(result)
+        return result
+    
+    #get id of Open_vSwitch entry from Open_vSwitch table
+    def get_uuid(self):
+        return self.get_ovs_raw()["result"][0]["rows"][0]["_uuid"][1]
+    
     def get_bridge_raw(self, bridge_id=None):
         query = ovsdb_query.Generator.get_bridges()
         
@@ -157,4 +168,18 @@ class OvsClient:
         
         query = ovsdb_query.Generator.del_port(bridge.get_uuid(), exist_ports, target_port.get_uuid())
         self._send(query)
+    
+    def add_bridge(self, bridge_name):
+        exist_bridges = []
+        for br in self.get_bridges():
+            if bridge_name == br.get_name():
+                raise ovspy_error.Duplicate("Bridge(%s) is already exist." % bridge_name)
+            exist_bridges.append(br.get_uuid())
+            
+        exist_bridges = list(set(exist_bridges))
         
+        query = ovsdb_query.Generator.add_bridge(self.get_uuid(), bridge_name, exist_bridges)
+        self._send(query)
+        
+    def del_bridge(self, bridge_name):
+        pass
