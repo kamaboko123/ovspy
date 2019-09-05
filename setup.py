@@ -4,8 +4,10 @@ requires = []
 
 setup(
     name='ovspy',
-    version='0.1.0b',
+    version='0.1.0b1',
     description='Open vSwitch Mnipulation Library',
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     url='https://github.com/kamaboko123/ovspy',
     author='kamaboko123',
     author_email='6112062+kamaboko123@users.noreply.github.com',
