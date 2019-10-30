@@ -13,6 +13,8 @@ class OvsBridge():
     
     def get_ports(self):
         target_bridge = self.ovs_client.get_bridge_raw(bridge_id=self.id)
+        if target_bridge is None :
+            raise NotFound("Bridge is not find.(id=self.id)")
         
         ret = []
         #If ports is exist at the bridge, 'set' is store at ["port"][0]
@@ -36,10 +38,14 @@ class OvsBridge():
         return None
     
     def get_raw(self):
+        if target_bridge is None :
+            raise NotFound("Bridge is not find.(id=self.id)")
         return self.ovs_client.get_bridge_raw(bridge_id=self.id)
     
     def get_name(self):
         target_bridge = self.ovs_client.get_bridge_raw(bridge_id=self.id)
+        if target_bridge is None :
+            raise NotFound("Bridge is not find.(id=self.id)")
         return target_bridge['name']
     
     def add_port(self, port_name, vlan=None):
