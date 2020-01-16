@@ -22,7 +22,7 @@ pip install ovspy
 
 ### Configure Open vSwitch Manager
 This library manipulate Open vSwitch by access OVSDB  
-You need to configure OVSDB manager port to manipulate OVSDB by TCP.
+You need to configure OVSDB manager port to manipulate OVSDB from ovspy via TCP.
 ```
 sudo ovs-vsctl set-manager ptcp:5678
 ```
@@ -81,13 +81,13 @@ bridge.add_port("p3", [])
 #Add port(Trunk port with restrict vlan)
 bridge.add_port("p4", [10, 20])
 
-#Delete port(Trunk port with restrict vlan)
+#Delete port
 bridge.del_port("p3")
 
 ```
 
 ### Errors
-ovspy has as following class as custom exception
+ovspy has following class as custom exception
 - `ovspy.ovs_error.OvspyError`
   - Super class of custom exceptions
 - `ovspy.ovs_error.Duplicate`
