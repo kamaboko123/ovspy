@@ -38,6 +38,7 @@ class OvsBridge():
         return None
     
     def get_raw(self):
+        target_bridge = self.ovs_client.get_bridge_raw(bridge_id=self.id)
         if target_bridge is None :
             raise NotFound("Bridge is not find.(id=self.id)")
         return self.ovs_client.get_bridge_raw(bridge_id=self.id)

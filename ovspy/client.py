@@ -121,17 +121,17 @@ class OvsClient:
         return None
     
     def get_port_raw(self, port_id=None):
+        if port_id is None:
+            query = ovsdb_query.Generator.get_ports()
+            result = self._send(query)
+            return result["result"][0]["rows"]
         
-        query = ovsdb_query.Generator.get_ports()
-        
-        result = self._send(query)
-        
-        if port_id is not None:
+        else:
+            query = ovsdb_query.Generator.get_port(port_id)
+            result = self._send(query)
             for p in result["result"][0]["rows"]:
                 if p['_uuid'][1] == port_id:
                     return p
-        else:
-            return result["result"][0]["rows"]
         
         return None
     
