@@ -4,7 +4,7 @@ requires = []
 
 setup(
     name='ovspy',
-    version='0.1.0b1',
+    version='0.1.0b2',
     description='Open vSwitch Mnipulation Library',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
