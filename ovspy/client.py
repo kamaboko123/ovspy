@@ -13,10 +13,11 @@ class OvsClient:
     SEND_DEBUG = False
     RECV_DEBUG = False
     
-    def __init__(self, ovsdb_port, ovsdb_ip="127.0.0.1"):
+    def __init__(self, ovsdb_port, ovsdb_ip="127.0.0.1", timeout=5, buffer_size=4096):
         self._ovsdb_ip = ipaddress.ip_address(ovsdb_ip)
         self._ovsdb_port = int(ovsdb_port)
-        self._query_timeout = 5
+        self._query_timeout = timeout
+        self._buffer_size = buffer_size
     
     def _send(self, query):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,14 +29,13 @@ class OvsClient:
         #s.shutdown(socket.SHUT_RDWR)
         
         buf = bytes()
-        bufsize = 16
         
         timeout = datetime.now() + timedelta(seconds=self._query_timeout)
         while True:
             if datetime.now() >= timeout:
                 raise ovspy_error.TransactionError("Timeout")
             
-            buf += s.recv(bufsize)
+            buf += s.recv(self._buffer_size)
             
             try:
                 query_result = json.loads(buf.decode())
@@ -57,7 +57,6 @@ class OvsClient:
                 pass
         
         s.close()
-        
         if self.RECV_DEBUG:
             sys.stderr.write("[RECV] %s\n" % query_result)
         
@@ -121,17 +120,17 @@ class OvsClient:
         return None
     
     def get_port_raw(self, port_id=None):
+        if port_id is None:
+            query = ovsdb_query.Generator.get_ports()
+            result = self._send(query)
+            return result["result"][0]["rows"]
         
-        query = ovsdb_query.Generator.get_ports()
-        
-        result = self._send(query)
-        
-        if port_id is not None:
+        else:
+            query = ovsdb_query.Generator.get_port(port_id)
+            result = self._send(query)
             for p in result["result"][0]["rows"]:
                 if p['_uuid'][1] == port_id:
                     return p
-        else:
-            return result["result"][0]["rows"]
         
         return None
     

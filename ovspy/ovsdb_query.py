@@ -58,6 +58,30 @@ class Generator():
         return query
     
     @staticmethod
+    def get_port(port_id):
+        query = {
+            "method":"transact",
+            "params":[
+                "Open_vSwitch",
+                {
+                    "op" : "select",
+                    "table" : "Port",
+                    "where" : [[
+                        "_uuid",
+                        "==",
+                        [
+                            "uuid",
+                            port_id
+                        ]
+                    ]],
+                }
+            ],
+            "id": random.randint(Generator.id_min, Generator.id_max)
+        }
+        
+        return query
+    
+    @staticmethod
     def add_port(bridge_id, exist_port_id_list, new_port_name, vlan=None):
         
         #generate temporary values for query string needs
