@@ -134,7 +134,18 @@ class OvsClient:
         
         return None
     
-    def add_port_to_bridge(self, bridge, port_name, vlan=None):
+    def get_interface_raw(self, interface_id):
+        query = ovsdb_query.Generator.get_interface(interface_id)
+        result = self._send(query)
+        for i in result["result"][0]["rows"]:
+            if i['_uuid'][1] == interface_id:
+                return i
+        
+        return None
+    
+
+    
+    def add_port_to_bridge(self, bridge, port_name, vlan=None, port_type=None):
         bridge_raw = bridge.get_raw()
         if bridge_raw is None:
             raise ovspy_error.NotFound("bridge is not found")
@@ -148,7 +159,7 @@ class OvsClient:
         for p in bridge.get_ports():
             exist_ports.append(p.get_uuid())
         
-        query = ovsdb_query.Generator.add_port(bridge.get_uuid(), exist_ports, port_name, vlan=vlan)
+        query = ovsdb_query.Generator.add_port(bridge.get_uuid(), exist_ports, port_name, vlan=vlan, port_type=port_type)
         self._send(query)
     
     def del_port_from_bridge(self, bridge, port_name):

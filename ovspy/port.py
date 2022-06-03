@@ -17,13 +17,24 @@ class OvsPort():
         target_port = self.ovs_client.get_port_raw(port_id=self.id)
         return target_port["name"]
     
+    def is_internal(self):
+        target_port = self.ovs_client.get_port_raw(port_id=self.id)
+        _interface = self.ovs_client.get_interface_raw(interface_id=target_port["interfaces"][1])
+        
+        return _interface["type"] == "internal"
+    
     def get_vlan_info(self):
         target_port = self.ovs_client.get_port_raw(port_id=self.id)
         
         if isinstance(target_port["tag"], list):
+            tags = None
+            if isinstance(target_port["trunks"], int):
+                tags = [target_port["trunks"]]
+            elif isinstance(target_port["trunks"], list):
+                tags = target_port["trunks"][1]
             return {
                 "mode":"trunk",
-                "tag": target_port["trunks"][1]
+                "tag": tags
             }
         elif isinstance(target_port["tag"], int):
             return {

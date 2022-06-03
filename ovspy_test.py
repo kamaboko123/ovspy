@@ -42,8 +42,9 @@ class TestOvspy(unittest.TestCase):
         self.init_ovs()
         
         bridge_name = "br0"
-        cmd_del_all_bridge = "ovs-vsctl add-br %s" % bridge_name
-        subprocess.run(cmd_del_all_bridge, shell=True)
+        self.ovs.add_bridge("br0")
+        #cmd_del_all_bridge = "ovs-vsctl add-br %s" % bridge_name
+        #subprocess.run(cmd_del_all_bridge, shell=True)
         
         bridges = self.ovs.get_bridges()
         self.assertEqual(len(bridges), 1)
@@ -79,7 +80,9 @@ class TestOvspy(unittest.TestCase):
         with self.assertRaises(ovspy_error.Duplicate):
             bridge.add_port("p1")
         
-        self.assertEqual(len(bridge.get_ports()), 7)
+        bridge.add_port("p9", 10, port_type="internal")
+        
+        self.assertEqual(len(bridge.get_ports()), 8)
         
         self.assertEqual(bridge.find_port("p0"), None)
         self.assertEqual(bridge.find_port("p1").get_name(), "p1")
@@ -95,11 +98,16 @@ class TestOvspy(unittest.TestCase):
         self.assertEqual(bridge.find_port("p4").get_vlan_info(), {"mode":"access","tag":4})
         self.assertEqual(bridge.find_port("p5").get_vlan_info(), {"mode":"trunk","tag":[5,15]})
         self.assertEqual(bridge.find_port("p6").get_vlan_info(), {"mode":"trunk","tag":[6,16]})
+        self.assertEqual(bridge.find_port("p9").get_vlan_info(), {"mode":"access", "tag":10})
+        
+        self.assertEqual(bridge.find_port("p1").is_internal(), False)
+        self.assertEqual(bridge.find_port("p3").is_internal(), False)
+        self.assertEqual(bridge.find_port("p9").is_internal(), True)
         
         bridge.del_port("p1")
         bridge.del_port("p3")
         bridge.del_port("p5")
-        self.assertEqual(len(bridge.get_ports()), 4)
+        self.assertEqual(len(bridge.get_ports()), 5)
         
         self.assertEqual(bridge.find_port("p0"), None)
         self.assertEqual(bridge.find_port("p1"), None)
@@ -112,11 +120,13 @@ class TestOvspy(unittest.TestCase):
         with self.assertRaises(ovspy_error.NotFound):
             bridge.del_port("p0")
         
-        self.assertEqual(len(bridge.get_ports()), 4)
+        self.assertEqual(len(bridge.get_ports()), 5)
     
     def init_ovs(self):
-        cmd_del_all_bridge = "ovs-vsctl show | grep Bridge | awk '{print $2}' | xargs -n 1 ovs-vsctl del-br"
-        subprocess.run(cmd_del_all_bridge, shell=True)
+        #cmd_del_all_bridge = "sudo ovs-vsctl show | grep Bridge | awk '{print $2}' | xargs -n 1 ovs-vsctl del-br"
+        #subprocess.run(cmd_del_all_bridge, shell=True)
+        for br in self.ovs.get_bridges():
+            self.ovs.del_bridge(br.get_name())
         
         #check bridge is not exist
         bridge = self.ovs.get_bridges()

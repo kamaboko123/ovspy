@@ -49,8 +49,8 @@ class OvsBridge():
             raise NotFound("Bridge is not find.(id=self.id)")
         return target_bridge['name']
     
-    def add_port(self, port_name, vlan=None):
-        self.ovs_client.add_port_to_bridge(self, port_name, vlan)
+    def add_port(self, port_name, vlan=None, port_type=None):
+        self.ovs_client.add_port_to_bridge(self, port_name, vlan, port_type)
     
     def del_port(self, port_name, vlan=None):
         self.ovs_client.del_port_from_bridge(self, port_name)

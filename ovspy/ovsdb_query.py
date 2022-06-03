@@ -82,7 +82,31 @@ class Generator():
         return query
     
     @staticmethod
-    def add_port(bridge_id, exist_port_id_list, new_port_name, vlan=None):
+    def get_interface(interface_id):
+        query = {
+            "method":"transact",
+            "params":[
+                "Open_vSwitch",
+                {
+                    "op" : "select",
+                    "table" : "Interface",
+                    "where" : [[
+                        "_uuid",
+                        "==",
+                        [
+                            "uuid",
+                            interface_id
+                        ]
+                    ]],
+                }
+            ],
+            "id": random.randint(Generator.id_min, Generator.id_max)
+        }
+        
+        return query
+    
+    @staticmethod
+    def add_port(bridge_id, exist_port_id_list, new_port_name, vlan=None, port_type=None):
         
         #generate temporary values for query string needs
         interface_tmp_id = "row%s" % str(uuid.uuid4()).replace("-", "_")
@@ -150,6 +174,11 @@ class Generator():
                 query["params"][2]["row"].update({"tag":["set", []], "trunks":["set", vlan]})
             else:
                 raise ValueError("Invalid VLAN type or format was specified.")
+        if port_type is not None:
+            if port_type in ["internal"]:
+                query["params"][1]["row"]["type"] = port_type
+            else:
+                raise ValueError("Invalid port type.")
         return query
     
     @staticmethod
